@@ -2,3 +2,4 @@ tests
 
 .terraform
 terraform.tfstate*
+terraform-provider-cassandra_v0.1.0

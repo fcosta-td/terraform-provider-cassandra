@@ -8,7 +8,6 @@ import (
 
 	"github.com/gocql/gocql"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -78,26 +77,25 @@ func resourceCassandraRole() *schema.Resource {
 	}
 }
 
-func readRole(session *gocql.Session, name string) (string, bool, bool, string, error) {
+func readRole(session *gocql.Session, name string) (string, bool, bool, error) {
 
 	var (
 		role        string
 		canLogin    bool
 		isSuperUser bool
-		saltedHash  string
 	)
 
-	iter := session.Query(`select role, can_login, is_superuser, salted_hash from system_auth.roles where role = ?`, name).Iter()
+	iter := session.Query(`select role, can_login, is_superuser from system_auth.roles where role = ?`, name).Iter()
 
 	defer iter.Close()
 
 	log.Printf("read role query returned %d", iter.NumRows())
 
-	for iter.Scan(&role, &canLogin, &isSuperUser, &saltedHash) {
-		return role, canLogin, isSuperUser, saltedHash, nil
+	for iter.Scan(&role, &canLogin, &isSuperUser) {
+		return role, canLogin, isSuperUser, nil
 	}
 
-	return "", false, false, "", nil
+	return "", false, false, nil
 }
 
 func resourceRoleExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
@@ -119,7 +117,7 @@ func resourceRoleExists(d *schema.ResourceData, meta interface{}) (b bool, e err
 
 	defer session.Close()
 
-	_name, _, _, _, err := readRole(session, name)
+	_name, _, _, err := readRole(session, name)
 
 	condition := _name == name && err == nil
 
@@ -187,24 +185,32 @@ func resourceRoleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	defer session.Close()
-	_name, login, superUser, saltedHash, readRoleErr := readRole(session, name)
+	_name, login, superUser, readRoleErr := readRole(session, name)
 
 	if readRoleErr != nil {
 		return readRoleErr
 	}
-
-	result := bcrypt.CompareHashAndPassword([]byte(saltedHash), []byte(password))
 
 	d.SetId(_name)
 	d.Set("name", _name)
 	d.Set("super_user", superUser)
 	d.Set("login", login)
 
-	if result == nil {
-		d.Set("password", password)
-	} else {
-		// password has changed between runs
-		d.Set("password", saltedHash)
+	// check password
+	if d.Get("login").(bool) == true {
+		checkPassword := CheckUserPassword(
+			d.Get("useSSL").(bool),
+			name,
+			password,
+			d.Get("port").(int),
+			d.Get("connectionTimeout").(int),
+			d.Get("protocol").(int),
+			d.Get("hosts").([]interface{}),
+			d.Get("root_ca").(string),
+			d.Get("min_tls_version").(string))
+		if checkPassword != d.Get("password") {
+			d.Set("password",password)
+		}
 	}
 
 	return nil
