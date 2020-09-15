@@ -1,4 +1,4 @@
-package main
+package cassandra
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 const (

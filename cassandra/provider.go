@@ -22,7 +22,7 @@ var (
 	}
 )
 
-func Provider() *schema.Provider {
+func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
 			"cassandra_keyspace": resourceCassandraKeyspace(),
