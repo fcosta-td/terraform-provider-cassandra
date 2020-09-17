@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	validPasswordRegexLiteral = `^[^"]{40,512}$`
+	validPasswordRegexLiteral = `^[^"]{16,512}$`
 	validRoleRegexLiteral     = `^[^"]{1,256}$`
 )
 
@@ -68,7 +68,7 @@ func resourceCassandraRole() *schema.Resource {
 					password := i.(string)
 
 					if !validPasswordRegex.MatchString(password) {
-						errors = append(errors, fmt.Errorf("password must contain between 40 and 512 chars and must not contain single quote character"))
+						errors = append(errors, fmt.Errorf("password must contain between 1 and 512 chars and must not contain single quote character"))
 					}
 
 					return

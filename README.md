@@ -60,7 +60,7 @@ The cql protocol binary version. Defaults to 4
 
 ```java
 locals {
-  stategy_options = {
+  strategy_options = {
     replication_factor = 1
   }
 }
