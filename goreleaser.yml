@@ -1,0 +1,13 @@
+builds:
+    - binary: terraform-provider-cassandra_v{{.Version}}
+      goos:
+        - darwin
+        - linux
+        - windows
+      goarch:
+        - amd64
+archives:
+    - id: terraform-provider-cassandra_v{{.Version}}-{{.Arch}}
+      format: zip
+      files:
+        - none*
