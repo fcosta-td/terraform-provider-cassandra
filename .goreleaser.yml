@@ -1,13 +1,24 @@
+archives:
+  - id: terraform-provider-cassandra_v{{.Version}}-{{.Arch}}
+    format: zip
+    files:
+      - none*
+before:
+  hooks:
+    - go mod download
 builds:
     - binary: terraform-provider-cassandra_v{{.Version}}
+      goarch:
+        - '386'
+        - amd64
+        - arm
+        - arm64
       goos:
         - darwin
+        - freebsd
         - linux
         - windows
-      goarch:
-        - amd64
-archives:
-    - id: terraform-provider-cassandra_v{{.Version}}-{{.Arch}}
-      format: zip
-      files:
-        - none*
+changelog:
+  skip: true
+env:
+  - CGO_ENABLED=0
