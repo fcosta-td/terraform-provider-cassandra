@@ -9,15 +9,10 @@ before:
 builds:
     - binary: terraform-provider-cassandra_v{{.Version}}
       goarch:
-        - '386'
         - amd64
-        - arm
-        - arm64
       goos:
         - darwin
-        - freebsd
         - linux
-        - windows
 changelog:
   skip: true
 env:
